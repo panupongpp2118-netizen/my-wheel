@@ -61,6 +61,7 @@
             flex: 1; min-width: 350px; background: var(--panel-bg); backdrop-filter: blur(15px);
             border-radius: 30px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.4s ease;
+            overflow: hidden;
         }
         .control-panel.hidden { opacity: 0; flex: 0; min-width: 0; width: 0; padding: 0; margin: 0; border:none; pointer-events: none; }
 
@@ -72,7 +73,6 @@
         .btn-add { background: var(--accent); color: #1a1a2e; border-radius: 12px; padding: 0 25px; }
         .btn-clear { background: var(--danger); color: white; border-radius: 12px; padding: 10px; font-size: 0.9rem; }
         
-        /* ซ่อนส่วนจัดการในโหมด Stealth */
         .stealth-hide { transition: 0.2s; }
         .stealth-active .stealth-hide { opacity: 0; width: 0; padding: 0; margin: 0; pointer-events: none; overflow: hidden; }
 
@@ -94,6 +94,31 @@
         .modal-content { background: rgba(255, 255, 255, 0.15); padding: 60px 80px; border-radius: 45px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
         .winner-name { font-size: 5.5rem; font-weight: 700; color: var(--accent); margin-bottom: 30px; text-shadow: 0 0 20px rgba(0, 206, 201, 0.5); }
         .btn-close { background: linear-gradient(90deg, #6c5ce7, #00cec9); color: white; padding: 12px 50px; border-radius: 15px; font-size: 1.2rem; }
+
+        /* ปุ่มซ่อนเมนูที่มุมขวาล่าง */
+        .toggle-menu-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 2000;
+            transition: 0.3s;
+            font-size: 20px;
+        }
+        .toggle-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 <body id="mainBody">
@@ -123,6 +148,10 @@
         </div>
     </div>
 
+    <div class="toggle-menu-btn" onclick="toggleMenu()" title="ซ่อน/แสดง เมนูจัดการ">
+        ⚙️
+    </div>
+
     <div id="resultModal" onclick="this.style.display='none';">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="winner-label">ขอแสดงความยินดีด้วย!</div>
@@ -146,41 +175,17 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function playTickSound() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        }
-
-        function playWinSound() {
-            const notes = [523.25, 659.25, 783.99, 1046.50];
-            notes.forEach((freq, i) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i * 0.15));
-                gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (i * 0.15));
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (i * 0.15) + 0.5);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(audioCtx.currentTime + (i * 0.15));
-                osc.stop(audioCtx.currentTime + (i * 0.15) + 0.5);
-            });
+        function toggleMenu() {
+            document.getElementById('panel').classList.toggle('hidden');
+            document.getElementById('layout').classList.toggle('centered');
+            document.getElementById('header').classList.toggle('hidden');
         }
 
         window.onkeydown = (e) => {
             if (e.target.tagName === 'INPUT') return;
-            // Hotkey [H] ซ่อนพาเนลทั้งหมด
             if (e.key.toLowerCase() === 'h') {
-                document.getElementById('panel').classList.toggle('hidden');
-                document.getElementById('layout').classList.toggle('centered');
-                document.getElementById('header').classList.toggle('hidden');
+                toggleMenu();
             }
-            // Hotkey [L] โหมด Stealth (ซ่อน Checkbox, แก้ไข, ลบ)
             if (e.key.toLowerCase() === 'l') {
                 mainBody.classList.toggle('stealth-active');
             }
@@ -255,21 +260,18 @@
             }
 
             names.forEach((n, i) => {
-                // วาดแผ่นวงล้อ
                 ctx.beginPath(); 
                 ctx.fillStyle = colors[i % colors.length]; 
                 ctx.moveTo(250, 250);
                 ctx.arc(250, 250, 240, i * arc, (i + 1) * arc); 
                 ctx.fill();
 
-                // ตั้งค่าขนาดตัวอักษรแบบ Dynamic
                 ctx.save(); 
                 ctx.translate(250, 250); 
                 ctx.rotate(i * arc + arc / 2);
                 ctx.textAlign = "right"; 
                 ctx.fillStyle = "white";
 
-                // คำนวณขนาดตัวอักษร: ยิ่งชื่อน้อย ตัวยิ่งใหญ่
                 let fontSize;
                 if (names.length <= 5) fontSize = 42;
                 else if (names.length <= 10) fontSize = 32;
@@ -277,19 +279,42 @@
                 else fontSize = 16;
 
                 ctx.font = `bold ${fontSize}px Prompt`;
-                
-                // ขยับตำแหน่งข้อความให้สมดุล (230 คือระยะจากจุดศูนย์กลาง)
                 ctx.fillText(n, 230, fontSize / 3); 
                 ctx.restore();
             });
 
-            // วาดวงกลมตรงกลางเพื่อความสวยงาม
             ctx.beginPath(); 
             ctx.arc(250, 250, 30, 0, Math.PI * 2); 
             ctx.fillStyle = "white"; 
             ctx.shadowBlur = 15;
             ctx.shadowColor = "rgba(0,0,0,0.2)";
             ctx.fill();
+        }
+
+        function playTickSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playWinSound() {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i * 0.15));
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (i * 0.15));
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (i * 0.15) + 0.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + (i * 0.15));
+                osc.stop(audioCtx.currentTime + (i * 0.15) + 0.5);
+            });
         }
 
         function spin() {
