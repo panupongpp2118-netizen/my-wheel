@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>วงล้อสุ่มรายชื่อ Pro - Stealth Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
@@ -19,34 +19,35 @@
             font-family: 'Prompt', sans-serif;
             background: var(--bg-gradient);
             color: white;
-            margin: 0; padding: 20px;
+            margin: 0; padding: 10px;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh; overflow-x: hidden;
         }
 
-        .header { text-align: center; margin-bottom: 30px; transition: 0.3s; }
-        .header.hidden { opacity: 0; pointer-events: none; }
-        .header h1 { font-size: 2.5rem; margin: 0; text-shadow: 0 0 15px rgba(0, 206, 201, 0.3); }
+        .header { text-align: center; margin-bottom: 20px; transition: 0.3s; }
+        .header.hidden { opacity: 0; pointer-events: none; height: 0; margin: 0; }
+        .header h1 { font-size: 1.8rem; margin: 10px 0; text-shadow: 0 0 15px rgba(0, 206, 201, 0.3); }
 
         .main-layout {
             display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 40px; width: 100%; max-width: 1200px;
+            gap: 20px; width: 100%; max-width: 1200px;
             transition: all 0.5s ease-in-out;
         }
         .main-layout.centered { max-width: 600px; }
 
-        .wheel-section { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .canvas-container { position: relative; margin-bottom: 30px; }
+        .wheel-section { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 300px; }
+        .canvas-container { position: relative; margin-bottom: 20px; max-width: 100%; }
         
         #canvas { 
-            border: 15px solid rgba(255, 255, 255, 0.1); border-radius: 50%; 
+            max-width: 100%; height: auto;
+            border: 10px solid rgba(255, 255, 255, 0.1); border-radius: 50%; 
             background: white; transition: transform 10s cubic-bezier(0.1, 0, 0, 1);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         #pointer { 
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            width: 50px; z-index: 10; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 40px; z-index: 10; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
             transform-origin: 50% 15%;
         }
 
@@ -58,82 +59,77 @@
         .wiggle { animation: pointer-wiggle 0.1s ease-out; }
 
         .control-panel { 
-            flex: 1; min-width: 350px; background: var(--panel-bg); backdrop-filter: blur(15px);
-            border-radius: 30px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.4s ease;
-            overflow: hidden;
+            flex: 1; min-width: 300px; background: var(--panel-bg); backdrop-filter: blur(15px);
+            border-radius: 25px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.4s ease; overflow: hidden;
         }
-        .control-panel.hidden { opacity: 0; flex: 0; min-width: 0; width: 0; padding: 0; margin: 0; border:none; pointer-events: none; }
+        .control-panel.hidden { opacity: 0; flex: 0; min-width: 0; width: 0; padding: 0; margin: 0; border:none; pointer-events: none; height: 0; }
 
         .input-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
         .input-group { display: flex; gap: 10px; }
-        input[type="text"] { flex: 1; padding: 15px; border-radius: 12px; border: none; font-family: 'Prompt'; font-size: 16px; outline: none; color: #333; }
+        input[type="text"] { flex: 1; padding: 12px; border-radius: 10px; border: none; font-family: 'Prompt'; font-size: 16px; outline: none; }
         
         button { border: none; cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; }
-        .btn-add { background: var(--accent); color: #1a1a2e; border-radius: 12px; padding: 0 25px; }
-        .btn-clear { background: var(--danger); color: white; border-radius: 12px; padding: 10px; font-size: 0.9rem; }
+        .btn-add { background: var(--accent); color: #1a1a2e; border-radius: 10px; padding: 0 15px; }
+        .btn-clear { background: var(--danger); color: white; border-radius: 10px; padding: 8px; font-size: 0.85rem; }
         
         .stealth-hide { transition: 0.2s; }
         .stealth-active .stealth-hide { opacity: 0; width: 0; padding: 0; margin: 0; pointer-events: none; overflow: hidden; }
 
-        .btn-spin { background: #2ecc71; color: white; padding: 20px 60px; font-size: 24px; border-radius: 50px; box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3); }
+        .btn-spin { background: #2ecc71; color: white; padding: 15px 40px; font-size: 20px; border-radius: 50px; box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3); margin-top: 10px; }
         .btn-spin:disabled { opacity: 0.3; }
 
-        .names-list { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 10px; max-height: 400px; overflow-y: auto; }
-        .name-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .name-text { flex: 1; margin-left: 10px; font-size: 1.1rem; }
+        .names-list { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 5px; max-height: 300px; overflow-y: auto; }
+        .name-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .name-text { flex: 1; margin-left: 10px; font-size: 1rem; }
         
-        .action-btns { display: flex; gap: 8px; }
-        .btn-small { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; color: white; }
+        .action-btns { display: flex; gap: 5px; }
+        .btn-small { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: white; }
         .btn-edit { background: var(--edit); color: #333; }
         .btn-del { background: var(--danger); }
 
-        .lock-checkbox { width: 18px; height: 18px; cursor: pointer; }
-
-        #resultModal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(10px); }
-        .modal-content { background: rgba(255, 255, 255, 0.15); padding: 60px 80px; border-radius: 45px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
-        .winner-name { font-size: 5.5rem; font-weight: 700; color: var(--accent); margin-bottom: 30px; text-shadow: 0 0 20px rgba(0, 206, 201, 0.5); }
-        .btn-close { background: linear-gradient(90deg, #6c5ce7, #00cec9); color: white; padding: 12px 50px; border-radius: 15px; font-size: 1.2rem; }
-
-        /* ปุ่มซ่อนเมนูที่มุมขวาล่าง */
+        /* --- ปุ่มฟันเฟือง (จางและเล็กพิเศษ) --- */
         .toggle-menu-btn {
-        position: fixed;
-        bottom: 30px; /* ขยับขึ้นมานิดนึงเพื่อให้พ้นแถบนำทางของมือถือ */
-        right: 30px;
-        width: 60px;  /* ขยายขนาดให้กดง่ายขึ้นในมือถือ */
-        height: 60px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.15); /* เพิ่มความชัดขึ้นเล็กน้อย */
-        color: rgba(255, 255, 255, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        z-index: 9999; /* มั่นใจว่าอยู่บนสุดแน่นอน */
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        font-size: 28px; /* ขยายไอคอน */
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        -webkit-tap-highlight-color: transparent; /* ลบสีฟ้าเวลาคลิกในมือถือ */
-    }
-
-    .toggle-menu-btn:active {
-        transform: scale(0.9); /* เอฟเฟกต์ยุบตัวเวลาแตะ */
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* ปรับแต่งสำหรับหน้าจอเล็ก */
-    @media (max-width: 600px) {
-        .toggle-menu-btn {
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05); /* จางลงมาก */
+            color: rgba(255, 255, 255, 0.2); /* สีไอคอนจางมาก */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 10001; /* ให้อยู่เหนือ Result Modal ด้วย */
+            transition: all 0.4s;
+            font-size: 18px;
+            -webkit-tap-highlight-color: transparent;
         }
-    }
+
+        .toggle-menu-btn:hover, .toggle-menu-btn:active {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.1);
         }
+
+        @media (max-width: 600px) {
+            .toggle-menu-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+
+        #resultModal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(10px); }
+        .modal-content { background: rgba(255, 255, 255, 0.15); padding: 40px; border-radius: 30px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.2); width: 80%; }
+        .winner-name { font-size: 3rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; word-wrap: break-word; }
+        .btn-close { background: linear-gradient(90deg, #6c5ce7, #00cec9); color: white; padding: 10px 30px; border-radius: 12px; font-size: 1.1rem; }
     </style>
 </head>
 <body id="mainBody">
@@ -163,15 +159,13 @@
         </div>
     </div>
 
-    <div class="toggle-menu-btn" onclick="toggleMenu()" title="ซ่อน/แสดง เมนูจัดการ">
-        ⚙️
-    </div>
+    <div class="toggle-menu-btn" onclick="toggleMenu()" title="ซ่อน/แสดง เมนู">⚙️</div>
 
     <div id="resultModal" onclick="this.style.display='none';">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="winner-label">ขอแสดงความยินดีด้วย!</div>
             <div class="winner-name" id="winnerName">...</div>
-            <button class="btn-close" onclick="document.getElementById('resultModal').style.display='none';">ปิดหน้าต่าง</button>
+            <button class="btn-close" onclick="document.getElementById('resultModal').style.display='none';">ปิด</button>
         </div>
     </div>
 
@@ -198,12 +192,8 @@
 
         window.onkeydown = (e) => {
             if (e.target.tagName === 'INPUT') return;
-            if (e.key.toLowerCase() === 'h') {
-                toggleMenu();
-            }
-            if (e.key.toLowerCase() === 'l') {
-                mainBody.classList.toggle('stealth-active');
-            }
+            if (e.key.toLowerCase() === 'h') toggleMenu();
+            if (e.key.toLowerCase() === 'l') mainBody.classList.toggle('stealth-active');
         };
 
         function addName() {
@@ -373,7 +363,7 @@
                 document.getElementById('winnerName').innerText = names[winnerIdx];
                 document.getElementById('resultModal').style.display = 'flex';
                 playWinSound();
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 1100 });
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, zIndex: 11000 });
             }, 10000);
         }
 
