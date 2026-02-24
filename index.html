@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>วงล้อสุ่มรายชื่อ Pro - iPad (With Lock System)</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="วงล้อสุ่ม">
+    <meta name="theme-color" content="#302b63">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2311/2311634.png">
+    
+    <title>วงล้อสุ่มรายชื่อ Pro - Mobile Ready</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogInZpZ2xvby1zdW0iLAogICJzaG9ydF9uYW1lIjogInZpZ2xvbyIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMzA0YjYzIiwKICAidGhlbWVfY29sb3IiOiAiIzMwNGI2MyIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzIzMTEvMjMxMTYzNC5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH1cbiAgXVxufQ==">
+
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
@@ -15,132 +25,164 @@
             --edit: #f1c40f;
         }
 
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Prompt', sans-serif;
             background: var(--bg-gradient);
             color: white;
-            margin: 0; padding: 20px;
+            margin: 0; padding: 15px;
             display: flex; flex-direction: column; align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: env(safe-area-inset-top);
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 2.2rem; margin: 0; text-shadow: 0 0 15px rgba(0, 206, 201, 0.3); }
+        .header { text-align: center; margin-bottom: 20px; transition: 0.3s; }
+        .header.hidden { display: none; }
+        .header h1 { font-size: 1.8rem; margin: 0; text-shadow: 0 0 15px rgba(0, 206, 201, 0.3); }
 
         .main-layout {
             display: flex; flex-direction: column; align-items: center;
-            gap: 30px; width: 100%; max-width: 1100px;
+            gap: 20px; width: 100%; max-width: 1200px;
         }
 
-        /* ส่วนวงล้อขนาดใหญ่ */
         .wheel-section { width: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
         .canvas-container { 
             position: relative; 
-            width: 85vw; 
-            max-width: 600px; 
+            width: 90vw; 
+            max-width: 400px;
             aspect-ratio: 1/1;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
         #canvas { 
-            width: 100% !important; height: 100% !important;
-            border: 12px solid rgba(255, 255, 255, 0.1); border-radius: 50%; 
+            width: 100% !important; height: auto !important;
+            border: 8px solid rgba(255, 255, 255, 0.1); border-radius: 50%; 
             background: white; transition: transform 10s cubic-bezier(0.1, 0, 0, 1);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         #pointer { 
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            width: 50px; z-index: 10; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            width: 35px; z-index: 10; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
         }
 
-        .btn-spin { 
-            background: #2ecc71; color: white; padding: 18px 60px; 
-            font-size: 24px; border-radius: 60px; 
-            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.4);
-            cursor: pointer;
-        }
-
-        /* ส่วนจัดการรายชื่อ */
         .control-panel { 
-            width: 100%; max-width: 600px; background: var(--panel-bg); backdrop-filter: blur(15px);
+            width: 100%; max-width: 500px; background: var(--panel-bg); backdrop-filter: blur(15px);
             border-radius: 25px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);
         }
+        .control-panel.hidden { display: none; }
 
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        input[type="text"] { flex: 1; padding: 15px; border-radius: 12px; border: none; font-size: 18px; font-family: 'Prompt'; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        input[type="text"] { 
+            flex: 1; padding: 12px; border-radius: 10px; border: none; 
+            font-family: 'Prompt'; font-size: 16px; outline: none;
+        }
         
-        .btn-add { background: var(--accent); color: #1a1a2e; border-radius: 12px; padding: 0 25px; font-weight: 600; }
-        .btn-clear { background: var(--danger); color: white; border-radius: 10px; padding: 8px; width: 100%; margin-bottom: 15px; font-size: 0.8rem; }
-        
-        .names-list { background: rgba(0,0,0,0.2); border-radius: 15px; max-height: 250px; overflow-y: auto; }
-        .name-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .name-text { flex: 1; margin-left: 12px; font-size: 1.1rem; }
-        
-        .lock-checkbox { width: 22px; height: 22px; cursor: pointer; accent-color: var(--accent); }
+        button { border: none; cursor: pointer; font-family: 'Prompt'; font-weight: 600; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
 
-        .action-btns { display: flex; gap: 8px; }
-        .btn-small { padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; color: white; border: none; cursor: pointer; font-family: 'Prompt'; }
+        .btn-add { background: var(--accent); color: #1a1a2e; border-radius: 10px; padding: 0 20px; }
+        .btn-clear { background: var(--danger); color: white; border-radius: 10px; padding: 8px; width: 100%; margin-bottom: 15px; font-size: 0.8rem; opacity: 0.8; }
+        
+        .btn-spin { 
+            background: #2ecc71; color: white; padding: 15px 40px; 
+            font-size: 20px; border-radius: 50px; 
+            box-shadow: 0 10px 20px rgba(46, 204, 113, 0.3);
+            width: 80%; max-width: 300px;
+        }
+
+        .names-list { background: rgba(0,0,0,0.2); border-radius: 15px; max-height: 200px; overflow-y: auto; }
+        .name-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .name-text { flex: 1; margin-left: 10px; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* การตั้งค่าการซ่อนปุ่ม (Stealth Settings) */
+        .lock-container { display: none; margin-right: 10px; } /* ซ่อนปุ่มล็อคเป็นค่าเริ่มต้น */
+        .stealth-active .lock-container { display: block; } /* โชว์ปุ่มล็อคเฉพาะตอนเปิดฟันเฟือง */
+        
+        .action-btns { display: flex; gap: 5px; }
+        .btn-small { padding: 5px 8px; border-radius: 5px; font-size: 0.7rem; color: white; }
         .btn-edit { background: var(--edit); color: #333; }
         .btn-del { background: var(--danger); }
 
-        /* Modal */
-        #resultModal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-        .modal-content { background: #24243e; padding: 40px; border-radius: 30px; text-align: center; width: 100%; max-width: 450px; border: 2px solid var(--accent); }
-        .winner-name { font-size: 3.5rem; font-weight: 700; color: var(--accent); margin: 25px 0; }
+        .stealth-hide { display: none; } /* ซ่อนปุ่มแก้ไข/ลบ เป็นค่าเริ่มต้น */
+        .stealth-active .stealth-hide { display: flex !important; }
 
-        @media (min-width: 1024px) {
-            .main-layout { flex-direction: row; align-items: flex-start; }
-            .canvas-container { max-width: 550px; }
+        #resultModal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { background: #24243e; padding: 40px 20px; border-radius: 30px; text-align: center; width: 100%; max-width: 350px; border: 2px solid var(--accent); animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .winner-name { font-size: 2.5rem; font-weight: 700; color: var(--accent); margin: 20px 0; word-wrap: break-word; }
+        
+        .mobile-toggle {
+            position: fixed; bottom: 15px; right: 15px; 
+            width: 45px; height: 45px; background: rgba(255,255,255,0.15);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; z-index: 2000; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        @media (min-width: 768px) {
+            .main-layout { flex-direction: row; align-items: flex-start; margin-top: 40px; }
+            .control-panel { flex: 1; }
+            .wheel-section { flex: 1.2; }
         }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <div class="header" id="header">
-        <h1>วงล้อสุ่มรายชื่อ Pro</h1>
+        <h1>วงล้อสุ่มรายชื่อ</h1>
     </div>
 
-    <div class="main-layout">
+    <div class="main-layout" id="layout">
         <div class="wheel-section">
             <div class="canvas-container">
                 <svg id="pointer" viewBox="0 0 40 40"><path d="M20 40 L5 10 A15 15 0 1 1 35 10 Z" fill="#ff4757"/></svg>
                 <canvas id="canvas" width="500" height="500"></canvas>
             </div>
-            <button class="btn-spin" id="spinBtn" onclick="spin()">เริ่มหมุนลุ้นรางวัล</button>
+            <button class="btn-spin" id="spinBtn" onclick="spin()">หมุนเลย!</button>
         </div>
 
         <div class="control-panel" id="panel">
-            <div class="input-group">
-                <input type="text" id="nameInput" placeholder="เพิ่มชื่อใหม่..." onkeypress="if(event.key==='Enter') addName()">
-                <button class="btn-add" onclick="addName()">เพิ่ม</button>
+            <div class="input-area">
+                <div class="input-group">
+                    <input type="text" id="nameInput" placeholder="เพิ่มชื่อ..." onkeypress="if(event.key==='Enter') addName()">
+                    <button class="btn-add" onclick="addName()">เพิ่ม</button>
+                </div>
+                <button class="btn-clear stealth-hide" onclick="clearAllNames()">ล้างทั้งหมด</button>
             </div>
-            <button class="btn-clear" onclick="clearAllNames()">ล้างรายชื่อทั้งหมด</button>
             <div class="names-list" id="namesUI"></div>
-            <p style="font-size: 0.8rem; color: #888; margin-top: 10px; text-align: center;">💡 ติ๊กถูกหน้าชื่อเพื่อ "ล็อคผล" ให้หยุดที่คนนั้น</p>
         </div>
     </div>
 
+    <div class="mobile-toggle" onclick="toggleStealthMobile()">⚙️</div>
+
     <div id="resultModal" onclick="this.style.display='none';">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <div style="font-size: 1.3rem;">ยินดีด้วย! ผู้ชนะคือ</div>
+            <div style="font-size: 1.1rem; opacity: 0.8;">ยินดีด้วย! ผู้ชนะคือ</div>
             <div class="winner-name" id="winnerName">...</div>
-            <button class="btn-add" style="padding: 12px 40px; border-radius: 30px;" onclick="document.getElementById('resultModal').style.display='none';">ตกลง</button>
+            <button class="btn-add" style="padding: 12px 40px; border-radius: 30px;" onclick="document.getElementById('resultModal').style.display='none';">ปิด</button>
         </div>
     </div>
 
     <script>
+        // Service Worker for Offline
+        if ('serviceWorker' in navigator) {
+            const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            navigator.serviceWorker.register(URL.createObjectURL(blob));
+        }
+
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
+        const mainBody = document.getElementById('mainBody');
         
-        let names = ['ตูน', 'เก๋', 'บอส', 'มีน', 'นนท์', 'ฟ้า'];
-        let lockedNames = []; // ตัวแปรเก็บรายชื่อที่ถูกล็อค
+        let names = JSON.parse(localStorage.getItem('wheelNames')) || ['ดวงดี', 'โชคดี', 'ร่ำรวย', 'สมหวัง'];
+        let lockedNames = [];
         let currentRotation = 0;
         let isSpinning = false;
-        const colors = ['#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#34495e'];
+        const colors = ['#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#2ecc71', '#f1c40f', '#e67e22', '#e84393', '#6c5ce7'];
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
@@ -154,47 +196,86 @@
             if(!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
+            osc.type = 'sine';
             osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
+        function playWinSound() {
+            if(!audioCtx) return;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (i * 0.15));
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime + (i * 0.15));
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (i * 0.15) + 0.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + (i * 0.15));
+                osc.stop(audioCtx.currentTime + (i * 0.15) + 0.5);
+            });
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('wheelNames', JSON.stringify(names));
+        }
+
+        function toggleStealthMobile() {
+            mainBody.classList.toggle('stealth-active');
+        }
+
         function addName() {
             const val = document.getElementById('nameInput').value.trim();
-            if (val) { names.push(val); document.getElementById('nameInput').value = ''; updateUI(); }
+            if (val) { 
+                names.push(val); 
+                document.getElementById('nameInput').value = ''; 
+                saveToStorage();
+                updateUI(); 
+            }
         }
 
         function deleteName(index) {
-            const name = names[index];
+            const nameToDelete = names[index];
             names.splice(index, 1);
-            lockedNames = lockedNames.filter(n => n !== name); // เอารูปล็อคออกด้วยถ้าลบชื่อ
+            // ลบออกจากรายการล็อคด้วยถ้าถูกลบ
+            lockedNames = lockedNames.filter(n => n !== nameToDelete);
+            saveToStorage();
             updateUI();
         }
 
         function editName(index) {
             const oldName = names[index];
             const newName = prompt("แก้ไขรายชื่อ:", oldName);
-            if (newName) {
-                names[index] = newName.trim();
-                if (lockedNames.includes(oldName)) {
-                    lockedNames = lockedNames.map(n => n === oldName ? newName.trim() : n);
-                }
-                updateUI();
-            }
-        }
-
-        function toggleLock(name) {
-            const idx = lockedNames.indexOf(name);
-            if (idx === -1) {
-                lockedNames.push(name);
-            } else {
-                lockedNames.splice(idx, 1);
+            if (newName) { 
+                names[index] = newName.trim(); 
+                // อัปเดตชื่อในรายการล็อค
+                const lockIdx = lockedNames.indexOf(oldName);
+                if(lockIdx !== -1) lockedNames[lockIdx] = newName.trim();
+                saveToStorage(); 
+                updateUI(); 
             }
         }
 
         function clearAllNames() {
-            if (confirm("ล้างรายชื่อทั้งหมด?")) { names = []; lockedNames = []; updateUI(); }
+            if (confirm("ล้างรายชื่อทั้งหมด?")) { 
+                names = []; 
+                lockedNames = [];
+                saveToStorage(); 
+                updateUI(); 
+            }
+        }
+
+        function toggleLock(n) {
+            const idx = lockedNames.indexOf(n);
+            if (idx === -1) {
+                lockedNames.push(n);
+            } else {
+                lockedNames.splice(idx, 1);
+            }
         }
 
         function updateUI() {
@@ -203,9 +284,11 @@
             names.forEach((n, i) => {
                 const isChecked = lockedNames.includes(n) ? 'checked' : '';
                 list.innerHTML += `<div class="name-item">
-                    <input type="checkbox" class="lock-checkbox" ${isChecked} onchange="toggleLock('${n}')">
+                    <div class="lock-container">
+                        <input type="checkbox" style="width:18px;height:18px" ${isChecked} onchange="toggleLock('${n}')">
+                    </div>
                     <span class="name-text">${n}</span>
-                    <div class="action-btns">
+                    <div class="action-btns stealth-hide">
                         <button class="btn-small btn-edit" onclick="editName(${i})">แก้</button>
                         <button class="btn-small btn-del" onclick="deleteName(${i})">ลบ</button>
                     </div>
@@ -217,7 +300,11 @@
         function draw() {
             const arc = (Math.PI * 2) / Math.max(names.length, 1);
             ctx.clearRect(0, 0, 500, 500);
-            if (names.length === 0) return;
+            
+            if (names.length === 0) {
+                ctx.beginPath(); ctx.fillStyle = "#444"; ctx.arc(250, 250, 240, 0, Math.PI * 2); ctx.fill();
+                return;
+            }
 
             names.forEach((n, i) => {
                 ctx.beginPath(); 
@@ -225,15 +312,17 @@
                 ctx.moveTo(250, 250);
                 ctx.arc(250, 250, 240, i * arc, (i + 1) * arc); 
                 ctx.fill();
+
                 ctx.save(); 
                 ctx.translate(250, 250); 
                 ctx.rotate(i * arc + arc / 2);
                 ctx.textAlign = "right"; ctx.fillStyle = "white";
                 let fontSize = names.length <= 10 ? 28 : 16;
                 ctx.font = `bold ${fontSize}px Prompt`;
-                ctx.fillText(n, 220, fontSize/3); 
+                ctx.fillText(n, 230, fontSize/3); 
                 ctx.restore();
             });
+
             ctx.beginPath(); ctx.arc(250, 250, 20, 0, Math.PI * 2); 
             ctx.fillStyle = "white"; ctx.fill();
         }
@@ -244,20 +333,19 @@
             isSpinning = true; spinBtn.disabled = true;
 
             const arcSize = 360 / names.length;
+            // สุ่มจากรายการที่ถูกล็อคไว้เท่านั้น (ถ้ามี)
+            let target = lockedNames.length > 0 ? lockedNames[Math.floor(Math.random() * lockedNames.length)] : null;
             let stopAt;
 
-            // ตรวจสอบว่ามีการล็อคผลไว้หรือไม่
-            if (lockedNames.length > 0) {
-                // สุ่มเลือกหนึ่งในรายชื่อที่ถูกล็อค
-                const targetName = lockedNames[Math.floor(Math.random() * lockedNames.length)];
-                const idx = names.indexOf(targetName);
-                // คำนวณองศาให้เข็มชี้ไปที่ช่องของชื่อนั้นพอดี
+            if (target) {
+                const idx = names.indexOf(target);
+                // คำนวณองศาเพื่อให้เข็มชี้ไปที่ชื่อที่เลือก
                 stopAt = 270 - (idx * arcSize) - (arcSize / 2);
             } else {
                 stopAt = Math.random() * 360;
             }
 
-            currentRotation += (360 * 10) + ((stopAt - (currentRotation % 360) + 360) % 360);
+            currentRotation += (360 * 8) + ((stopAt - (currentRotation % 360) + 360) % 360);
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
             let lastIdx = -1;
@@ -267,7 +355,10 @@
                 const angle = (Math.atan2(matrix.m12, matrix.m11) * 180 / Math.PI);
                 const norm = (360 - (angle % 360) + 270) % 360;
                 const curIdx = Math.floor(norm / (360/names.length)) % names.length;
-                if (curIdx !== lastIdx) { playTickSound(); lastIdx = curIdx; }
+                if (curIdx !== lastIdx) {
+                    playTickSound();
+                    lastIdx = curIdx;
+                }
             }, 50);
 
             setTimeout(() => {
@@ -276,6 +367,7 @@
                 const winnerIdx = Math.floor(((360 - (currentRotation % 360) + 270) % 360) / (360/names.length)) % names.length;
                 document.getElementById('winnerName').innerText = names[winnerIdx];
                 document.getElementById('resultModal').style.display = 'flex';
+                playWinSound();
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             }, 10000);
         }
